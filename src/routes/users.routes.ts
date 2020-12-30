@@ -3,13 +3,13 @@ import { getRepository } from 'typeorm';
 import User from '../models/User';
 import CreateUserService from '../services/CreateUserService';
 
-const appointmentsRouter = Router();
+const usersRouter = Router();
 
 /**
  * Get list of users
  */
 
-appointmentsRouter.get('/', async (request: Request, response: Response) => {
+usersRouter.get('/', async (request: Request, response: Response) => {
   try {
     const usersRepository = getRepository(User);
     const listOfUsers = await usersRepository.find();
@@ -22,23 +22,23 @@ appointmentsRouter.get('/', async (request: Request, response: Response) => {
 /**
  * Create new user
  */
-appointmentsRouter.post('/', async (request: Request, response: Response) => {
+usersRouter.post('/', async (request: Request, response: Response) => {
   try {
-    const {name, email, password} = request.body;
+    const {name, email, password: pass} = request.body;
     const createUserService = new CreateUserService();
 
     const user = await createUserService.execute({
       name, 
       email,
-      password
+      password: pass
     });
 
-    delete user.password;
+    const {password, ...userWithoutPassword} = user;
 
-    return response.status(200).json(user);
+    return response.status(200).json(userWithoutPassword);
   } catch (err) {
     return response.status(500).json({error: err.message});
   }
 })
 
-export default appointmentsRouter;
+export default usersRouter;
